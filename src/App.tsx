@@ -3,6 +3,7 @@ import { AxiosError } from "axios";
 import CountIndicator from "components/CountIndicator";
 import Todo from "components/Todo";
 import TodoInput from "components/TodoInput";
+import { useJuunzziQuery } from "hooks/useJuunzziQuery";
 import { useState } from "react";
 import { useEffect } from "react";
 
@@ -17,21 +18,11 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<AxiosError | null>(null);
 
-  useEffect(() => {
-    setIsLoading(true);
-    (async () => {
-      try {
-        const response = await client.get<TodoType[]>("/todos");
-        setTodos(response.data);
-      } catch (e) {
-        if (e instanceof AxiosError) {
-          setError(e);
-        }
-      } finally {
-        setIsLoading(false);
-      }
-    })();
-  }, []);
+  const data = useJuunzziQuery(
+    "/todos",
+    async () => await client.get<TodoType[]>("/todos"),
+    "App"
+  );
 
   const handleAddTodo = async (title: string) => {
     try {
@@ -91,7 +82,7 @@ function App() {
 
   if (isLoading) return <>...Loading</>;
   if (error) return <>Error!</>;
-
+  console.log("render");
   return (
     <>
       {todos.map((todo) => (
